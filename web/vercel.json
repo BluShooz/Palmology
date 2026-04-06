@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://palm-insight-ai.vercel.app"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "https://palm-insight-ai.vercel.app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
