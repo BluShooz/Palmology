@@ -1,5 +1,7 @@
 # 🧠 Palm Insight AI
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/BluShooz/Palmology)
+
 A production-ready AI-powered biometric analysis system that scans palm images and generates psychologically grounded personality insights.
 
 ## ✨ Features
@@ -230,17 +232,35 @@ curl -X POST http://localhost:8000/analyze \
 
 ## 🚢 Deployment
 
-### Backend (Render/Fly.io)
-1. Push code to GitHub
-2. Connect repository to Render/Fly.io
-3. Set environment variables
-4. Deploy
+**🌐 Live Demo:** [palm-insight-ai.vercel.app](https://palm-insight-ai.vercel.app) (Coming Soon)
 
-### Web (Vercel)
-1. Push code to GitHub
-2. Import project to Vercel
-3. Set `NEXT_PUBLIC_API_URL` environment variable
-4. Deploy
+**📖 Full Deployment Guide:** [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)
+
+### Quick Deploy to Vercel
+
+1. **Deploy Backend First** (Render.com - Free):
+   - Go to [render.com](https://render.com)
+   - Connect repo: `BluShooz/Palmology`
+   - Root dir: `backend`
+   - Add `OPENAI_API_KEY` env var
+   - Deploy → Get backend URL
+
+2. **Deploy Frontend** (Vercel - Free):
+   - Go to [vercel.com](https://vercel.com)
+   - Import repo: `BluShooz/Palmology`
+   - Root dir: `web`
+   - Add `NEXT_PUBLIC_API_URL` = your backend URL
+   - Deploy → Get Vercel URL
+
+### Backend Deployment Options
+
+**Recommended:** Render.com (Free tier available)
+- Alternative: Fly.io, Railway.app, AWS, Google Cloud
+
+### Web Deployment Options
+
+**Recommended:** Vercel (Free tier available)
+- Alternative: Netlify, AWS Amplify, GitHub Pages
 
 ### Mobile (App Store/Play Store)
 1. Build standalone app with EAS Build:
