@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-white antialiased;
+  }
+}
+
+@layer components {
+  .neon-text {
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+  }
+
+  .neon-border {
+    box-shadow: 0 0 10px #00ffff, inset 0 0 10px rgba(0, 255, 255, 0.1);
+  }
+
+  .scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, transparent, #00ffff, transparent);
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+    animation: scan 2s linear infinite;
+  }
+
+  .camera-overlay {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card {
+    animation: fade-in 0.5s ease-in;
+  }
+
+  .glow-effect {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
