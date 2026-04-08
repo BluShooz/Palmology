@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .container {
+            background: #12121a;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #00ffff;
+        }
+        button {
+            background: #00ffff;
+            color: #0a0a0f;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0080ff;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #video {
+            width: 100%;
+            max-width: 640px;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            margin: 20px 0;
+            transform: scaleX(-1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+        }
+        .error {
+            background: #ef4444;
+            color: white;
+        }
+        .info {
+            background: #3b82f6;
+            color: white;
+        }
+        #logs {
+            background: #0a0a0f;
+            border: 1px solid #1a1a2e;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 2px 0;
+        }
+        .log-error { color: #ef4444; }
+        .log-success { color: #10b981; }
+        .log-info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <h1>🎥 Simple Camera Test</h1>
+
+    <div class="container">
+        <h2>Browser Information</h2>
+        <div id="browserInfo"></div>
+    </div>
+
+    <div class="container">
+        <h2>Camera Controls</h2>
+        <button id="startBtn">Start Camera</button>
+        <button id="stopBtn" disabled>Stop Camera</button>
+        <button id="testBtn">Test Camera API</button>
+    </div>
+
+    <div class="container">
+        <h2>Status</h2>
+        <div id="status"></div>
+    </div>
+
+    <div class="container">
+        <h2>Video Preview</h2>
+        <video id="video" autoplay playsinline muted></video>
+    </div>
+
+    <div class="container">
+        <h2>Logs</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const testBtn = document.getElementById('testBtn');
+        const statusDiv = document.getElementById('status');
+        const logsDiv = document.getElementById('logs');
+        const browserInfoDiv = document.getElementById('browserInfo');
+
+        let stream = null;
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function showStatus(message, type = 'info') {
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showBrowserInfo() {
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Platform': navigator.platform,
+                'HTTPS': window.location.protocol === 'https:',
+                'Host': window.location.hostname,
+                'Camera API': !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia),
+                'Enumerate Devices': !!(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices)
+            };
+
+            browserInfoDiv.innerHTML = Object.entries(info)
+                .map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+                .join('');
+        }
+
+        async function testCameraAPI() {
+            log('Testing camera API...', 'info');
+
+            if (!navigator.mediaDevices) {
+                log('❌ mediaDevices not available', 'error');
+                showStatus('Camera API not supported', 'error');
+                return;
+            }
+
+            if (!navigator.mediaDevices.getUserMedia) {
+                log('❌ getUserMedia not available', 'error');
+                showStatus('getUserMedia not supported', 'error');
+                return;
+            }
+
+            try {
+                log('Calling getUserMedia...', 'info');
+                const testStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: false
+                });
+
+                log('✅ getUserMedia succeeded!', 'success');
+                showStatus('Camera API test successful!', 'success');
+
+                testStream.getTracks().forEach(track => track.stop());
+                log('Test stream stopped', 'info');
+
+            } catch (error) {
+                log(`❌ Camera API test failed: ${error.name}`, 'error');
+                log(`Error message: ${error.message}`, 'error');
+
+                let errorMsg = `Camera test failed: ${error.name}`;
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'Permission denied. Please allow camera access.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg = 'No camera found on this device.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMsg = 'Camera is already in use by another application.';
+                }
+
+                showStatus(errorMsg, 'error');
+            }
+        }
+
+        async function enumerateDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(d => d.kind === 'videoinput');
+                log(`Found ${cameras.length} camera(s)`, 'info');
+
+                cameras.forEach((camera, index) => {
+                    log(`Camera ${index + 1}: ${camera.label || 'Unnamed'}`, 'info');
+                });
+
+                return cameras;
+            } catch (error) {
+                log(`Failed to enumerate devices: ${error.message}`, 'error');
+                return [];
+            }
+        }
+
+        async function startCamera() {
+            log('Starting camera...', 'info');
+            showStatus('Requesting camera access...', 'info');
+
+            try {
+                const cameras = await enumerateDevices();
+
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                log('✅ Camera access granted!', 'success');
+                log(`Stream tracks: ${stream.getTracks().length}`, 'info');
+
+                video.srcObject = stream;
+
+                video.onloadedmetadata = () => {
+                    log(`Video dimensions: ${video.videoWidth}x${video.videoHeight}`, 'info');
+                    log('✅ Video playing!', 'success');
+                    showStatus('Camera is working!', 'success');
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                };
+
+                video.onerror = (event) => {
+                    log(`❌ Video error: ${event}`, 'error');
+                    showStatus('Video element error', 'error');
+                };
+
+            } catch (error) {
+                log(`❌ Failed to start camera: ${error.name}`, 'error');
+                log(`Error: ${error.message}`, 'error');
+
+                let errorMsg = `Failed: ${error.name}`;
+                if (error.name === 'NotAllowedError') {
+                    errorMsg = 'Permission denied. Please allow camera access and refresh.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMsg = 'No camera found. Please connect a camera.';
+                } else if (error.name === 'NotReadableError') {
+                    errorMsg = 'Camera is already in use. Close other apps.';
+                }
+
+                showStatus(errorMsg, 'error');
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    log(`Stopping track: ${track.kind}`, 'info');
+                    track.stop();
+                });
+                stream = null;
+                video.srcObject = null;
+                log('Camera stopped', 'info');
+                showStatus('Camera stopped', 'info');
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startCamera);
+        stopBtn.addEventListener('click', stopCamera);
+        testBtn.addEventListener('click', testCameraAPI);
+
+        // Initialize
+        showBrowserInfo();
+        log('Page loaded', 'info');
+        log('Click "Test Camera API" first to test permissions', 'info');
+        log('Then click "Start Camera" to see video', 'info');
+
+        // Check if on HTTPS or localhost
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            log('⚠️ Warning: Not on HTTPS or localhost', 'error');
+            log('Camera API requires HTTPS or localhost', 'error');
+            showStatus('Camera requires HTTPS or localhost', 'error');
+        }
+    </script>
+</body>
+</html>
