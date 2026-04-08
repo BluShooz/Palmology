@@ -66,3 +66,14 @@
 .animate-scan {
   animation: scanLine 2s linear infinite;
 }
+
+/* Additional scan animation */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+

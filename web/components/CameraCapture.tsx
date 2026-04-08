@@ -124,6 +124,11 @@ export default function CameraCapture({
     }, 'image/jpeg', 0.95)
   }
 
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 isScanning state:', isScanning)
+  }, [isScanning])
+
   // Error state
   if (error) {
     return (
@@ -144,7 +149,7 @@ export default function CameraCapture({
   return (
     <div className="relative w-full">
       {/* Video Container */}
-      <div className="relative aspect-video bg-dark-card rounded-lg overflow-hidden neon-border">
+      <div className="relative aspect-video bg-dark-card rounded-lg overflow-hidden neon-border" style={{ minHeight: '400px' }}>
         {!isReady && !isScanning && (
           <div className="absolute inset-0 flex items-center justify-center bg-dark-card z-10">
             <div className="w-16 h-16 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin" />
@@ -163,7 +168,7 @@ export default function CameraCapture({
           style={{ transform: 'scaleX(-1)' }}
         />
 
-        {/* Corner Guides - only show when ready */}
+        {/* Corner Guides */}
         {isReady && !isScanning && (
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-8 left-8 w-16 h-16 border-t-4 border-l-4 border-neon-cyan rounded-tl-lg" />
@@ -183,68 +188,91 @@ export default function CameraCapture({
           </div>
         )}
 
-        {/* SCANNING OVERLAY - Now inside CameraCapture */}
+        {/* SCANNING OVERLAY - EXTREMELY VISIBLE */}
         {isScanning && (
-          <div className="absolute inset-0 pointer-events-none z-30 bg-neon-cyan/5">
-            {/* Bright Scan Line */}
-            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan"
-                 style={{
-                   boxShadow: '0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px rgba(0, 255, 255, 0.5)',
-                   animation: 'scanLine 2s linear infinite'
-                 }}
+          <div
+            className="absolute inset-0 z-50"
+            style={{
+              backgroundColor: 'rgba(0, 255, 255, 0.1)',
+              border: '4px solid #00ffff',
+            }}
+          >
+            {/* DEBUG: Add text to show it's scanning */}
+            <div className="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded font-bold text-xl z-50">
+              🔴 SCANNING MODE ACTIVE
+            </div>
+
+            {/* Bright Scan Line - Very Visible */}
+            <div
+              className="absolute left-0 right-0 z-50"
+              style={{
+                height: '8px',
+                background: 'linear-gradient(to right, transparent, #00ffff, #00ffff, transparent)',
+                boxShadow: '0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px rgba(0, 255, 255, 0.8)',
+                animation: 'scanLine 1.5s linear infinite',
+                position: 'absolute',
+              }}
             />
 
-            {/* Horizontal scan beam */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/10 to-transparent animate-pulse" />
+            {/* Horizontal sweep beam */}
+            <div
+              className="absolute inset-0 z-40"
+              style={{
+                background: 'linear-gradient(to bottom, transparent, rgba(0, 255, 255, 0.3), transparent)',
+                animation: 'pulse 1s ease-in-out infinite',
+              }}
+            />
 
-            {/* Corner brackets */}
-            <div className="absolute top-4 left-4 w-24 h-24 border-t-4 border-l-4 border-cyan-400 rounded-tl-2xl animate-pulse" />
-            <div className="absolute top-4 right-4 w-24 h-24 border-t-4 border-r-4 border-cyan-400 rounded-tr-2xl animate-pulse" style={{ animationDelay: '0.2s' }} />
-            <div className="absolute bottom-4 left-4 w-24 h-24 border-b-4 border-l-4 border-cyan-400 rounded-bl-2xl animate-pulse" style={{ animationDelay: '0.4s' }} />
-            <div className="absolute bottom-4 right-4 w-24 h-24 border-b-4 border-r-4 border-cyan-400 rounded-br-2xl animate-pulse" style={{ animationDelay: '0.6s' }} />
+            {/* Massive corner brackets */}
+            <div className="absolute top-8 left-8 w-32 h-32 border-t-8 border-l-8 border-yellow-400 rounded-tl-3xl z-40 animate-bounce" />
+            <div className="absolute top-8 right-8 w-32 h-32 border-t-8 border-r-8 border-yellow-400 rounded-tr-3xl z-40 animate-bounce" style={{ animationDelay: '0.3s' }} />
+            <div className="absolute bottom-8 left-8 w-32 h-32 border-b-8 border-l-8 border-yellow-400 rounded-bl-3xl z-40 animate-bounce" style={{ animationDelay: '0.6s' }} />
+            <div className="absolute bottom-8 right-8 w-32 h-32 border-b-8 border-r-8 border-yellow-400 rounded-br-3xl z-40 animate-bounce" style={{ animationDelay: '0.9s' }} />
 
-            {/* Center reticle */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-48 h-48 border-2 border-cyan-400/40 rounded-lg animate-pulse" />
-              <div className="absolute w-36 h-36 border border-cyan-400/30 rounded-lg animate-ping" />
+            {/* Giant center circle */}
+            <div className="absolute inset-0 flex items-center justify-center z-40">
+              <div
+                className="w-64 h-64 border-8 border-green-400 rounded-full animate-ping z-40"
+                style={{ boxShadow: '0 0 50px #00ff00' }}
+              />
+              <div
+                className="absolute w-48 h-48 border-4 border-cyan-400 rounded-full animate-pulse z-40"
+                style={{ boxShadow: '0 0 40px #00ffff' }}
+              />
             </div>
 
-            {/* Scanning particles */}
-            <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-cyan-400 rounded-full animate-ping" />
-            <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '0.3s' }} />
-            <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '0.7s' }} />
-            <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
-            <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
+            {/* Giant bouncing particles */}
+            <div className="absolute top-1/4 left-1/4 w-8 h-8 bg-red-500 rounded-full animate-ping z-40" />
+            <div className="absolute top-1/3 right-1/4 w-8 h-8 bg-yellow-500 rounded-full animate-ping z-40" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute bottom-1/4 left-1/3 w-8 h-8 bg-green-500 rounded-full animate-ping z-40" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-1/2 right-1/3 w-8 h-8 bg-purple-500 rounded-full animate-bounce z-40" />
+            <div className="absolute bottom-1/3 left-1/2 w-8 h-8 bg-pink-500 rounded-full animate-bounce z-40" style={{ animationDelay: '0.7s' }} />
 
-            {/* Grid overlay */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="w-full h-full" style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px)
-                `,
-                backgroundSize: '40px 40px',
-              }} />
-            </div>
-
-            {/* Status text */}
-            <div className="absolute bottom-6 left-0 right-0 text-center z-40">
-              <div className="inline-block bg-black/80 backdrop-blur-sm px-8 py-4 rounded-xl border-2 border-cyan-400">
-                <p className="text-cyan-400 text-xl font-bold mb-2 animate-pulse">
-                  🔍 SCANNING PALM...
-                </p>
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" />
-                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                </div>
-                <p className="text-cyan-300 text-sm">
-                  Extracting biometric features...
-                </p>
-                <p className="text-cyan-400/80 text-xs mt-1">
-                  Generating AI personality insights
-                </p>
+            {/* Status box - Cannot miss this */}
+            <div
+              className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-50"
+              style={{
+                backgroundColor: '#000000',
+                border: '4px solid #00ffff',
+                borderRadius: '16px',
+                padding: '24px 32px',
+                boxShadow: '0 0 40px #00ffff, 0 0 80px rgba(0, 255, 255, 0.5)',
+              }}
+            >
+              <p className="text-cyan-400 text-3xl font-bold mb-4 text-center" style={{ textShadow: '0 0 20px #00ffff' }}>
+                🔍 SCANNING...
+              </p>
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="w-4 h-4 bg-cyan-400 rounded-full animate-bounce" />
+                <div className="w-4 h-4 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <div className="w-4 h-4 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
               </div>
+              <p className="text-white text-lg text-center">
+                Extracting biometric features...
+              </p>
+              <p className="text-gray-400 text-base text-center mt-2">
+                Generating AI insights
+              </p>
             </div>
           </div>
         )}
@@ -265,6 +293,14 @@ export default function CameraCapture({
 
       {/* Hidden Canvas */}
       <canvas ref={canvasRef} className="hidden" />
+
+      {/* Debug info */}
+      {isScanning && (
+        <div className="mt-4 p-4 bg-yellow-900/50 border-2 border-yellow-400 rounded-lg">
+          <p className="text-yellow-300 font-bold">⚠️ SCANNING STATE IS ACTIVE</p>
+          <p className="text-white text-sm mt-2">The scan overlay should be visible now</p>
+        </div>
+      )}
     </div>
   )
 }
