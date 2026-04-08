@@ -12,6 +12,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleCapture = useCallback(async (imageBlob: Blob) => {
+    console.log('🎯 Capture started, setting isScanning to true')
     setIsScanning(true)
     setError('')
     setResult(null)
@@ -21,12 +22,19 @@ export default function Home() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/analyze`, {
-        method: 'POST',
-        body: formData,
-      })
+      console.log('📡 Calling API:', apiUrl)
+
+      // Add minimum delay to ensure scan animation is visible
+      const [response] = await Promise.all([
+        fetch(`${apiUrl}/analyze`, {
+          method: 'POST',
+          body: formData,
+        }),
+        new Promise(resolve => setTimeout(resolve, 4000)) // 4 second minimum scan time
+      ])
 
       const data = await response.json()
+      console.log('✅ API response:', data)
 
       if (data.success) {
         setResult(data.data)
@@ -37,6 +45,7 @@ export default function Home() {
       setError('Failed to connect to analysis server')
       console.error(err)
     } finally {
+      console.log('🏁 Analysis complete, setting isScanning to false')
       setIsScanning(false)
     }
   }, [])
