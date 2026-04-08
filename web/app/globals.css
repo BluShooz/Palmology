@@ -21,10 +21,11 @@
     position: absolute;
     left: 0;
     right: 0;
-    height: 4px;
-    background: linear-gradient(to right, transparent, #00ffff, transparent);
-    box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+    height: 6px;
+    background: linear-gradient(to right, transparent, #00ffff 50%, transparent);
+    box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px rgba(0, 255, 255, 0.5);
     animation: scan 2s linear infinite;
+    z-index: 20;
   }
 
   .camera-overlay {
@@ -38,6 +39,54 @@
 
   .glow-effect {
     animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Scan animation keyframes */
+@keyframes scan {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px #00ffff;
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 40px #00ffff;
+  }
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

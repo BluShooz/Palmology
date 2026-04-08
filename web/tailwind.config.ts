@@ -34,6 +34,12 @@ const config: Config = {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
       },
+      delay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '700': '700ms',
+      },
     },
   },
   plugins: [],
