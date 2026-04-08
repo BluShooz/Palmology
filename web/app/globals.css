@@ -17,39 +17,13 @@
     box-shadow: 0 0 10px #00ffff, inset 0 0 10px rgba(0, 255, 255, 0.1);
   }
 
-  .scan-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(to right, transparent, #00ffff 50%, transparent);
-    box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px rgba(0, 255, 255, 0.5);
-    animation: scan 2s linear infinite;
-    z-index: 20;
-  }
-
-  .camera-overlay {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .result-card {
-    animation: fade-in 0.5s ease-in;
-  }
-
   .glow-effect {
     animation: pulse-glow 2s ease-in-out infinite;
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* Scan animation keyframes */
-@keyframes scan {
+/* SCAN ANIMATION - CRITICAL */
+@keyframes scanLine {
   0% {
     top: 0%;
     opacity: 0;
@@ -66,7 +40,6 @@
   }
 }
 
-/* Pulse glow animation */
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
@@ -78,7 +51,6 @@
   }
 }
 
-/* Fade in animation */
 @keyframes fade-in {
   0% {
     opacity: 0;
@@ -90,8 +62,7 @@
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Add animation for scan line */
+.animate-scan {
+  animation: scanLine 2s linear infinite;
 }

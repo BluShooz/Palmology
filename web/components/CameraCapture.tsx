@@ -26,12 +26,10 @@ export default function CameraCapture({
       try {
         console.log('🎥 Initializing camera...')
 
-        // Check browser support
         if (!navigator.mediaDevices?.getUserMedia) {
           throw new Error('Camera not supported in this browser')
         }
 
-        // Get camera stream
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: 1280, height: 720 },
           audio: false,
@@ -43,14 +41,11 @@ export default function CameraCapture({
         }
 
         console.log('✅ Camera stream obtained')
-
         setStream(mediaStream)
 
-        // Attach to video element
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream
 
-          // Wait for video to be ready
           videoRef.current.onloadedmetadata = () => {
             if (!mounted || !videoRef.current) return
 
@@ -102,7 +97,7 @@ export default function CameraCapture({
         mediaStream.getTracks().forEach(t => t.stop())
       }
     }
-  }, []) // Run once on mount
+  }, [])
 
   const handleCapture = () => {
     if (!videoRef.current || !canvasRef.current || !isReady) {
@@ -150,7 +145,7 @@ export default function CameraCapture({
     <div className="relative w-full">
       {/* Video Container */}
       <div className="relative aspect-video bg-dark-card rounded-lg overflow-hidden neon-border">
-        {!isReady && (
+        {!isReady && !isScanning && (
           <div className="absolute inset-0 flex items-center justify-center bg-dark-card z-10">
             <div className="w-16 h-16 border-4 border-neon-cyan border-t-transparent rounded-full animate-spin" />
             <p className="absolute mt-24 text-gray-400">Starting camera...</p>
@@ -169,7 +164,7 @@ export default function CameraCapture({
         />
 
         {/* Corner Guides - only show when ready */}
-        {isReady && (
+        {isReady && !isScanning && (
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-8 left-8 w-16 h-16 border-t-4 border-l-4 border-neon-cyan rounded-tl-lg" />
             <div className="absolute top-8 right-8 w-16 h-16 border-t-4 border-r-4 border-neon-cyan rounded-tr-lg" />
@@ -182,9 +177,75 @@ export default function CameraCapture({
         )}
 
         {/* Ready indicator */}
-        {isReady && (
+        {isReady && !isScanning && (
           <div className="absolute top-4 left-4 right-4 bg-green-900/90 text-green-200 px-4 py-2 rounded-lg text-sm border border-green-500 text-center">
             ✅ Camera ready! Position your palm and tap to capture
+          </div>
+        )}
+
+        {/* SCANNING OVERLAY - Now inside CameraCapture */}
+        {isScanning && (
+          <div className="absolute inset-0 pointer-events-none z-30 bg-neon-cyan/5">
+            {/* Bright Scan Line */}
+            <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-scan"
+                 style={{
+                   boxShadow: '0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px rgba(0, 255, 255, 0.5)',
+                   animation: 'scanLine 2s linear infinite'
+                 }}
+            />
+
+            {/* Horizontal scan beam */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/10 to-transparent animate-pulse" />
+
+            {/* Corner brackets */}
+            <div className="absolute top-4 left-4 w-24 h-24 border-t-4 border-l-4 border-cyan-400 rounded-tl-2xl animate-pulse" />
+            <div className="absolute top-4 right-4 w-24 h-24 border-t-4 border-r-4 border-cyan-400 rounded-tr-2xl animate-pulse" style={{ animationDelay: '0.2s' }} />
+            <div className="absolute bottom-4 left-4 w-24 h-24 border-b-4 border-l-4 border-cyan-400 rounded-bl-2xl animate-pulse" style={{ animationDelay: '0.4s' }} />
+            <div className="absolute bottom-4 right-4 w-24 h-24 border-b-4 border-r-4 border-cyan-400 rounded-br-2xl animate-pulse" style={{ animationDelay: '0.6s' }} />
+
+            {/* Center reticle */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-48 h-48 border-2 border-cyan-400/40 rounded-lg animate-pulse" />
+              <div className="absolute w-36 h-36 border border-cyan-400/30 rounded-lg animate-ping" />
+            </div>
+
+            {/* Scanning particles */}
+            <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-cyan-400 rounded-full animate-ping" />
+            <div className="absolute top-1/3 right-1/4 w-3 h-3 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '0.3s' }} />
+            <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '0.7s' }} />
+            <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
+            <div className="absolute bottom-1/3 left-1/2 w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
+
+            {/* Grid overlay */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="w-full h-full" style={{
+                backgroundImage: `
+                  linear-gradient(rgba(0, 255, 255, 0.3) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0, 255, 255, 0.3) 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px',
+              }} />
+            </div>
+
+            {/* Status text */}
+            <div className="absolute bottom-6 left-0 right-0 text-center z-40">
+              <div className="inline-block bg-black/80 backdrop-blur-sm px-8 py-4 rounded-xl border-2 border-cyan-400">
+                <p className="text-cyan-400 text-xl font-bold mb-2 animate-pulse">
+                  🔍 SCANNING PALM...
+                </p>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" />
+                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                  <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                </div>
+                <p className="text-cyan-300 text-sm">
+                  Extracting biometric features...
+                </p>
+                <p className="text-cyan-400/80 text-xs mt-1">
+                  Generating AI personality insights
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -195,7 +256,7 @@ export default function CameraCapture({
           onClick={handleCapture}
           disabled={isScanning || !isReady}
           className={`relative w-20 h-20 bg-neon-cyan rounded-full hover:bg-neon-blue disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
-            isReady ? 'glow-effect' : ''
+            isReady && !isScanning ? 'glow-effect' : ''
           }`}
         >
           <div className="absolute inset-2 bg-dark-bg rounded-full" />
